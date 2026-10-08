@@ -29,13 +29,17 @@ function App() {
     if (isNaN(amount) || amount <= 0) return;
 
     const newTransaction: Transaction = {
-      id: crypto.randomUUID(), 
+      id: crypto.randomUUID(),
       description: desc,
       amount,
       type
     };
 
     setTransactions(prev => [newTransaction, ...prev]);
+  };
+
+  const deleteTransaction = (id: string) => {
+    setTransactions(prev => prev.filter(t => t.id !== id));
   };
 
   const handleExpenseSubmit = (e: React.FormEvent) => {
@@ -70,7 +74,6 @@ function App() {
 
         {/* Layout Kiri Kanan */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          
           {/* Form Pengeluaran */}
           <div className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-red-400">
             <h2 className="text-xl font-semibold text-red-500 mb-4">Catat Pengeluaran</h2>
@@ -130,8 +133,40 @@ function App() {
               </button>
             </form>
           </div>
-
         </div>
+
+        {/* Riwayat Transaksi */}
+        <div className="bg-white p-6 rounded-2xl shadow-sm">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4">Riwayat Transaksi</h2>
+          
+          {transactions.length === 0 ? (
+            <p className="text-center text-gray-400 py-6">Belum ada transaksi yang dicatat.</p>
+          ) : (
+            <ul className="space-y-3">
+              {transactions.map((t) => (
+                <li key={t.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center gap-3">
+                    {/* Indikator warna di sebelah kiri tiap item */}
+                    <div className={`w-2 h-10 rounded-full ${t.type === 'expense' ? 'bg-red-400' : 'bg-emerald-400'}`}></div>
+                    <div>
+                      <p className="font-medium text-gray-700">{t.description}</p>
+                      <p className={`text-sm font-semibold ${t.type === 'expense' ? 'text-red-500' : 'text-emerald-500'}`}>
+                        {t.type === 'expense' ? '-' : '+'} Rp {t.amount.toLocaleString('id-ID')}
+                      </p>
+                    </div>
+                  </div>
+                  <button 
+                    onClick={() => deleteTransaction(t.id)}
+                    className="text-sm text-gray-400 hover:text-red-500 px-3 py-1 bg-white border border-gray-200 rounded-lg hover:border-red-200 transition-colors"
+                  >
+                    Hapus
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
       </div>
     </div>
   )
