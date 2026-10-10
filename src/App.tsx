@@ -5,6 +5,7 @@ export type Transaction = {
   description: string;
   amount: number;
   type: 'income' | 'expense';
+  date: string; 
 };
 
 function App() {
@@ -19,6 +20,8 @@ function App() {
   const [incomeDesc, setIncomeDesc] = useState('');
   const [incomeAmount, setIncomeAmount] = useState('');
 
+  const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
+
   useEffect(() => {
     localStorage.setItem('transactions', JSON.stringify(transactions));
   }, [transactions]);
@@ -32,7 +35,8 @@ function App() {
       id: crypto.randomUUID(),
       description: desc,
       amount,
-      type
+      type,
+      date: new Date().toISOString(), 
     };
 
     setTransactions(prev => [newTransaction, ...prev]);
@@ -59,6 +63,11 @@ function App() {
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const balance = totalIncome - totalExpense;
+
+  const filteredTransactions = transactions.filter(t => {
+    if (filter === 'all') return true;
+    return t.type === filter;
+  });
 
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
@@ -137,22 +146,53 @@ function App() {
 
         {/* Riwayat Transaksi */}
         <div className="bg-white p-6 rounded-2xl shadow-sm">
-          <h2 className="text-xl font-semibold text-gray-800 mb-4">Riwayat Transaksi</h2>
+          <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+            <h2 className="text-xl font-semibold text-gray-800">Riwayat Transaksi</h2>
+            
+            {/* Tombol Filter */}
+            <div className="flex bg-gray-100 p-1 rounded-lg">
+              <button 
+                onClick={() => setFilter('all')}
+                className={`px-4 py-1.5 text-sm rounded-md transition-colors ${filter === 'all' ? 'bg-white shadow-sm font-medium text-gray-800' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Semua
+              </button>
+              <button 
+                onClick={() => setFilter('income')}
+                className={`px-4 py-1.5 text-sm rounded-md transition-colors ${filter === 'income' ? 'bg-white shadow-sm font-medium text-emerald-600' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Pemasukan
+              </button>
+              <button 
+                onClick={() => setFilter('expense')}
+                className={`px-4 py-1.5 text-sm rounded-md transition-colors ${filter === 'expense' ? 'bg-white shadow-sm font-medium text-red-600' : 'text-gray-500 hover:text-gray-700'}`}
+              >
+                Pengeluaran
+              </button>
+            </div>
+          </div>
           
-          {transactions.length === 0 ? (
-            <p className="text-center text-gray-400 py-6">Belum ada transaksi yang dicatat.</p>
+          {filteredTransactions.length === 0 ? (
+            <p className="text-center text-gray-400 py-6">Tidak ada transaksi ditemukan.</p>
           ) : (
             <ul className="space-y-3">
-              {transactions.map((t) => (
+              {filteredTransactions.map((t) => (
                 <li key={t.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
                   <div className="flex items-center gap-3">
-                    {/* Indikator warna di sebelah kiri tiap item */}
                     <div className={`w-2 h-10 rounded-full ${t.type === 'expense' ? 'bg-red-400' : 'bg-emerald-400'}`}></div>
                     <div>
                       <p className="font-medium text-gray-700">{t.description}</p>
-                      <p className={`text-sm font-semibold ${t.type === 'expense' ? 'text-red-500' : 'text-emerald-500'}`}>
-                        {t.type === 'expense' ? '-' : '+'} Rp {t.amount.toLocaleString('id-ID')}
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className={`text-sm font-semibold ${t.type === 'expense' ? 'text-red-500' : 'text-emerald-500'}`}>
+                          {t.type === 'expense' ? '-' : '+'} Rp {t.amount.toLocaleString('id-ID')}
+                        </p>
+                        {/* Render Tanggal jika ada */}
+                        {t.date && (
+                          <span className="text-xs text-gray-400 border-l border-gray-300 pl-2">
+                            {new Date(t.date).toLocaleDateString('id-ID', { day: 'numeric', month: 'short' })}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <button 
