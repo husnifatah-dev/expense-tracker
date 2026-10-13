@@ -1,7 +1,8 @@
 // src/App.tsx
 import { useState, useEffect } from 'react'
-import type { Transaction } from './types'
+import { type Transaction } from './types'
 import TransactionList from './components/TransactionList'
+import TransactionForm from './components/TransactionForm'
 
 const EXPENSE_CATEGORIES = ['Makan & Minum', 'Transportasi', 'Tagihan', 'Hiburan', 'Lainnya'];
 const INCOME_CATEGORIES = ['Gaji', 'Bonus', 'Bisnis', 'Lainnya'];
@@ -12,20 +13,13 @@ function App() {
     return savedTransactions ? JSON.parse(savedTransactions) : [];
   });
 
-  const [expenseDesc, setExpenseDesc] = useState('');
-  const [expenseAmount, setExpenseAmount] = useState('');
-  const [expenseCategory, setExpenseCategory] = useState(EXPENSE_CATEGORIES[0]);
-
-  const [incomeDesc, setIncomeDesc] = useState('');
-  const [incomeAmount, setIncomeAmount] = useState('');
-  const [incomeCategory, setIncomeCategory] = useState(INCOME_CATEGORIES[0]);
-
   const [filter, setFilter] = useState<'all' | 'income' | 'expense'>('all');
 
   useEffect(() => {
     localStorage.setItem('transactions', JSON.stringify(transactions));
   }, [transactions]);
 
+  // Fungsi utama untuk menambah data
   const addTransaction = (type: 'income' | 'expense', desc: string, amountStr: string, category: string) => {
     if (!desc || !amountStr) return;
     const amount = parseFloat(amountStr);
@@ -46,18 +40,7 @@ function App() {
     setTransactions(prev => prev.filter(t => t.id !== id));
   };
 
-  const handleExpenseSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    addTransaction('expense', expenseDesc, expenseAmount, expenseCategory);
-    setExpenseDesc(''); setExpenseAmount(''); setExpenseCategory(EXPENSE_CATEGORIES[0]);
-  };
-
-  const handleIncomeSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    addTransaction('income', incomeDesc, incomeAmount, incomeCategory);
-    setIncomeDesc(''); setIncomeAmount(''); setIncomeCategory(INCOME_CATEGORIES[0]);
-  };
-
+  // Kalkulasi Saldo
   const totalIncome = transactions.filter(t => t.type === 'income').reduce((acc, curr) => acc + curr.amount, 0);
   const totalExpense = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + curr.amount, 0);
   const balance = totalIncome - totalExpense;
@@ -74,32 +57,21 @@ function App() {
           </p>
         </div>
 
-        {/* Layout Kiri Kanan */}
+        {/* Layout Kiri Kanan dengan Reusable Components */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* Form Pengeluaran */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-red-400">
-            <h2 className="text-xl font-semibold text-red-500 mb-4">Catat Pengeluaran</h2>
-            <form onSubmit={handleExpenseSubmit} className="space-y-4">
-              <div><label className="block text-sm text-gray-600 mb-1">Keterangan</label><input type="text" value={expenseDesc} onChange={(e) => setExpenseDesc(e.target.value)} className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-red-200" placeholder="Contoh: Beli Kopi" /></div>
-              <div><label className="block text-sm text-gray-600 mb-1">Kategori</label><select value={expenseCategory} onChange={(e) => setExpenseCategory(e.target.value)} className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-red-200 bg-white">{EXPENSE_CATEGORIES.map(cat => (<option key={cat} value={cat}>{cat}</option>))}</select></div>
-              <div><label className="block text-sm text-gray-600 mb-1">Jumlah (Rp)</label><input type="number" value={expenseAmount} onChange={(e) => setExpenseAmount(e.target.value)} className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-red-200" placeholder="25000" /></div>
-              <button type="submit" className="w-full bg-red-500 text-white rounded-lg p-2 hover:bg-red-600 font-medium transition-colors">Tambah Pengeluaran</button>
-            </form>
-          </div>
-
-          {/* Form Pemasukan */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm border-t-4 border-emerald-400">
-            <h2 className="text-xl font-semibold text-emerald-500 mb-4">Catat Pemasukan</h2>
-            <form onSubmit={handleIncomeSubmit} className="space-y-4">
-              <div><label className="block text-sm text-gray-600 mb-1">Keterangan</label><input type="text" value={incomeDesc} onChange={(e) => setIncomeDesc(e.target.value)} className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="Contoh: Gaji / Project" /></div>
-              <div><label className="block text-sm text-gray-600 mb-1">Kategori</label><select value={incomeCategory} onChange={(e) => setIncomeCategory(e.target.value)} className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-200 bg-white">{INCOME_CATEGORIES.map(cat => (<option key={cat} value={cat}>{cat}</option>))}</select></div>
-              <div><label className="block text-sm text-gray-600 mb-1">Jumlah (Rp)</label><input type="number" value={incomeAmount} onChange={(e) => setIncomeAmount(e.target.value)} className="w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 focus:ring-emerald-200" placeholder="5000000" /></div>
-              <button type="submit" className="w-full bg-emerald-500 text-white rounded-lg p-2 hover:bg-emerald-600 font-medium transition-colors">Tambah Pemasukan</button>
-            </form>
-          </div>
+          <TransactionForm 
+            type="expense" 
+            categories={EXPENSE_CATEGORIES} 
+            onSubmit={addTransaction} 
+          />
+          <TransactionForm 
+            type="income" 
+            categories={INCOME_CATEGORIES} 
+            onSubmit={addTransaction} 
+          />
         </div>
 
-        {/* Komponen Riwayat Transaksi yang sudah dipisah */}
+        {/* Komponen Riwayat Transaksi */}
         <TransactionList 
           transactions={transactions} 
           filter={filter} 
