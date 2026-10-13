@@ -1,4 +1,6 @@
-import type { Transaction } from '../types';
+// src/components/TransactionList.tsx
+import { type Transaction } from '../types';
+import Swal from 'sweetalert2';
 
 type TransactionListProps = {
   transactions: Transaction[];
@@ -12,6 +14,32 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
     if (filter === 'all') return true;
     return t.type === filter;
   });
+
+  // Fungsi pembungkus untuk konfirmasi SweetAlert
+  const handleDeleteConfirm = (id: string) => {
+    Swal.fire({
+      title: 'Yakin mau dihapus?',
+      text: "Data transaksi ini tidak bisa dikembalikan!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#ef4444', 
+      cancelButtonColor: '#9ca3af', 
+      confirmButtonText: 'Ya, hapus!',
+      cancelButtonText: 'Batal',
+      borderRadius: '1rem', 
+    }).then((result) => {
+      if (result.isConfirmed) {
+        onDelete(id); 
+        
+        Swal.fire({
+          title: 'Terhapus!',
+          text: 'Data transaksimu berhasil dihapus.',
+          icon: 'success',
+          confirmButtonColor: '#10b981', 
+        });
+      }
+    });
+  };
 
   return (
     <div className="bg-white p-6 rounded-2xl shadow-sm">
@@ -54,7 +82,11 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
                   </div>
                 </div>
               </div>
-              <button onClick={() => onDelete(t.id)} className="text-sm text-gray-400 hover:text-red-500 px-3 py-1 bg-white border border-gray-200 rounded-lg hover:border-red-200 transition-colors">
+              {/* Ubah onClick di bawah ini menjadi handleDeleteConfirm */}
+              <button 
+                onClick={() => handleDeleteConfirm(t.id)} 
+                className="text-sm text-gray-400 hover:text-red-500 px-3 py-1 bg-white border border-gray-200 rounded-lg hover:border-red-200 transition-colors"
+              >
                 Hapus
               </button>
             </li>
