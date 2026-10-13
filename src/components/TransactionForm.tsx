@@ -1,3 +1,4 @@
+// src/components/TransactionForm.tsx
 import { useState } from 'react';
 
 type TransactionFormProps = {
@@ -20,11 +21,26 @@ export default function TransactionForm({ type, categories, onSubmit }: Transact
   const title = isExpense ? 'Catat Pengeluaran' : 'Catat Pemasukan';
   const buttonText = isExpense ? 'Tambah Pengeluaran' : 'Tambah Pemasukan';
   const placeholderDesc = isExpense ? 'Contoh: Beli Kopi' : 'Contoh: Gaji / Project';
-  const placeholderAmount = isExpense ? '25000' : '5000000';
+  const placeholderAmount = isExpense ? '25.000' : '5.000.000';
+
+  const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const rawValue = e.target.value.replace(/\D/g, '');
+    
+    if (!rawValue) {
+      setAmount('');
+      return;
+    }
+
+    const formattedValue = new Intl.NumberFormat('id-ID').format(Number(rawValue));
+    setAmount(formattedValue);
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSubmit(type, desc, amount, category);
+
+    const cleanAmount = amount.replace(/\./g, '');
+    
+    onSubmit(type, desc, cleanAmount, category);
     
     setDesc('');
     setAmount('');
@@ -43,6 +59,7 @@ export default function TransactionForm({ type, categories, onSubmit }: Transact
             onChange={(e) => setDesc(e.target.value)} 
             className={`w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 ${focusRingClass}`} 
             placeholder={placeholderDesc} 
+            required
           />
         </div>
         <div>
@@ -60,11 +77,13 @@ export default function TransactionForm({ type, categories, onSubmit }: Transact
         <div>
           <label className="block text-sm text-gray-600 mb-1">Jumlah (Rp)</label>
           <input 
-            type="number" 
+            type="text" 
+            inputMode="numeric" 
             value={amount} 
-            onChange={(e) => setAmount(e.target.value)} 
+            onChange={handleAmountChange} 
             className={`w-full border border-gray-300 rounded-lg p-2 focus:outline-none focus:ring-2 ${focusRingClass}`} 
-            placeholder={placeholderAmount} 
+            placeholder={placeholderAmount}
+            required
           />
         </div>
         <button type="submit" className={`w-full text-white rounded-lg p-2 font-medium transition-colors ${buttonClass}`}>
