@@ -1,4 +1,3 @@
-// src/components/TransactionList.tsx
 import { type Transaction } from '../types';
 import Swal from 'sweetalert2';
 
@@ -15,7 +14,6 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
     return t.type === filter;
   });
 
-  // Fungsi pembungkus untuk konfirmasi SweetAlert
   const handleDeleteConfirm = (id: string) => {
     Swal.fire({
       title: 'Yakin mau dihapus?',
@@ -26,7 +24,9 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
       cancelButtonColor: '#9ca3af', 
       confirmButtonText: 'Ya, hapus!',
       cancelButtonText: 'Batal',
-      borderRadius: '1rem', 
+      customClass: {
+        popup: 'rounded-2xl'
+      }
     }).then((result) => {
       if (result.isConfirmed) {
         onDelete(id); 
