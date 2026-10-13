@@ -1,5 +1,5 @@
-// src/components/TransactionForm.tsx
 import { useState } from 'react';
+import Swal from 'sweetalert2'; 
 
 type TransactionFormProps = {
   type: 'income' | 'expense';
@@ -25,26 +25,31 @@ export default function TransactionForm({ type, categories, onSubmit }: Transact
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const rawValue = e.target.value.replace(/\D/g, '');
-    
     if (!rawValue) {
       setAmount('');
       return;
     }
-
     const formattedValue = new Intl.NumberFormat('id-ID').format(Number(rawValue));
     setAmount(formattedValue);
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    const cleanAmount = amount.replace(/\./g, '');
     
+    const cleanAmount = amount.replace(/\./g, '');
     onSubmit(type, desc, cleanAmount, category);
     
     setDesc('');
     setAmount('');
     setCategory(categories[0]);
+
+    Swal.fire({
+      title: 'Berhasil!',
+      text: isExpense ? 'Pengeluaran berhasil dicatat.' : 'Pemasukan berhasil dicatat.',
+      icon: 'success',
+      timer: 1500,
+      showConfirmButton: false, 
+    });
   };
 
   return (
