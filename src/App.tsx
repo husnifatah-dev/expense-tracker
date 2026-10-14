@@ -20,7 +20,7 @@ function App() {
     localStorage.setItem('transactions', JSON.stringify(transactions));
   }, [transactions]);
 
-  const addTransaction = (type: 'income' | 'expense', desc: string, amountStr: string, category: string) => {
+  const addTransaction = (type: 'income' | 'expense', desc: string, amountStr: string, category: string, dateStr: string) => {
     if (!desc || !amountStr) return;
     const amount = parseFloat(amountStr);
     if (isNaN(amount) || amount <= 0) return;
@@ -30,7 +30,7 @@ function App() {
       description: desc,
       amount,
       type,
-      date: new Date().toISOString(),
+      date: new Date(dateStr).toISOString(),
       category,
     };
     setTransactions(prev => [newTransaction, ...prev]);
