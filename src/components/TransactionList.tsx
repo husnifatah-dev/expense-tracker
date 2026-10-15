@@ -1,4 +1,3 @@
-// src/components/TransactionList.tsx
 import { type Transaction } from '../types';
 import Swal from 'sweetalert2';
 
@@ -10,17 +9,12 @@ type TransactionListProps = {
 };
 
 export default function TransactionList({ transactions, filter, setFilter, onDelete }: TransactionListProps) {
-  // 1. Filter tipe transaksinya dulu (Semua / Pemasukan / Pengeluaran)
   const filteredTransactions = transactions.filter(t => {
     if (filter === 'all') return true;
     return t.type === filter;
   });
 
-  // 2. Tambahkan logika SORTING di sini
-  // Kita pakai spread operator [...] agar tidak merusak array aslinya
   const sortedTransactions = [...filteredTransactions].sort((a, b) => {
-    // getTime() mengubah tanggal jadi angka milidetik.
-    // b - a artinya urutkan dari angka terbesar (terbaru) ke terkecil (terlama)
     return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
