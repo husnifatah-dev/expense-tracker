@@ -1,3 +1,4 @@
+// src/components/TransactionList.tsx
 import { type Transaction } from '../types';
 import Swal from 'sweetalert2';
 
@@ -9,9 +10,18 @@ type TransactionListProps = {
 };
 
 export default function TransactionList({ transactions, filter, setFilter, onDelete }: TransactionListProps) {
+  // 1. Filter tipe transaksinya dulu (Semua / Pemasukan / Pengeluaran)
   const filteredTransactions = transactions.filter(t => {
     if (filter === 'all') return true;
     return t.type === filter;
+  });
+
+  // 2. Tambahkan logika SORTING di sini
+  // Kita pakai spread operator [...] agar tidak merusak array aslinya
+  const sortedTransactions = [...filteredTransactions].sort((a, b) => {
+    // getTime() mengubah tanggal jadi angka milidetik.
+    // b - a artinya urutkan dari angka terbesar (terbaru) ke terkecil (terlama)
+    return new Date(b.date).getTime() - new Date(a.date).getTime();
   });
 
   const handleDeleteConfirm = (id: string) => {
@@ -21,7 +31,7 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
       icon: 'warning',
       showCancelButton: true,
       confirmButtonColor: '#ef4444', 
-      cancelButtonColor: '#9ca3af', 
+      cancelButtonColor: '#9ca3af',  
       confirmButtonText: 'Ya, hapus!',
       cancelButtonText: 'Batal',
       customClass: {
@@ -29,13 +39,16 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
       }
     }).then((result) => {
       if (result.isConfirmed) {
-        onDelete(id); 
+        onDelete(id);
         
         Swal.fire({
           title: 'Terhapus!',
           text: 'Data transaksimu berhasil dihapus.',
           icon: 'success',
-          confirmButtonColor: '#10b981', 
+          confirmButtonColor: '#10b981',
+          customClass: {
+            popup: 'rounded-2xl'
+          }
         });
       }
     });
@@ -53,11 +66,12 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
         </div>
       </div>
       
-      {filteredTransactions.length === 0 ? (
+      {/* 3. Render array yang sudah di-sort (sortedTransactions) */}
+      {sortedTransactions.length === 0 ? (
         <p className="text-center text-gray-400 py-6">Tidak ada transaksi ditemukan.</p>
       ) : (
         <ul className="space-y-3">
-          {filteredTransactions.map((t) => (
+          {sortedTransactions.map((t) => (
             <li key={t.id} className="flex justify-between items-center p-3 border border-gray-100 rounded-xl hover:bg-gray-50 transition-colors">
               <div className="flex items-center gap-3">
                 <div className={`w-2 h-10 rounded-full ${t.type === 'expense' ? 'bg-red-400' : 'bg-emerald-400'}`}></div>
@@ -82,7 +96,6 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
                   </div>
                 </div>
               </div>
-              {/* Ubah onClick di bawah ini menjadi handleDeleteConfirm */}
               <button 
                 onClick={() => handleDeleteConfirm(t.id)} 
                 className="text-sm text-gray-400 hover:text-red-500 px-3 py-1 bg-white border border-gray-200 rounded-lg hover:border-red-200 transition-colors"
