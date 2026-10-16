@@ -1,9 +1,9 @@
-// src/App.tsx
 import { useState, useEffect } from 'react'
 import { type Transaction } from './types'
 import TransactionList from './components/TransactionList'
 import TransactionForm from './components/TransactionForm'
 import SummaryCards from './components/SummaryCards'
+import EditModal from './components/EditModal'
 
 const EXPENSE_CATEGORIES = ['Makan & Minum', 'Transportasi', 'Tagihan', 'Hiburan', 'Lainnya'];
 const INCOME_CATEGORIES = ['Gaji', 'Bonus', 'Bisnis', 'Lainnya'];
@@ -19,6 +19,15 @@ function App() {
   useEffect(() => {
     localStorage.setItem('transactions', JSON.stringify(transactions));
   }, [transactions]);
+
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+
+  const updateTransaction = (id: string, updatedData: Partial<Transaction>) => {
+    setTransactions(prev => 
+      prev.map(t => (t.id === id ? { ...t, ...updatedData } : t))
+    );
+    setEditingTransaction(null); // Tutup modal setelah simpan
+  };
 
   const addTransaction = (type: 'income' | 'expense', desc: string, amountStr: string, category: string, dateStr: string) => {
     if (!desc || !amountStr) return;
@@ -71,8 +80,15 @@ function App() {
           filter={filter} 
           setFilter={setFilter} 
           onDelete={deleteTransaction} 
+          onEdit={setEditingTransaction}
         />
 
+        <EditModal
+          transaction={editingTransaction}
+          categories={editingTransaction?.type === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES}
+          onClose={() => setEditingTransaction(null)}
+          onSave={updateTransaction}
+        />
       </div>
     </div>
   )

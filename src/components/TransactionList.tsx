@@ -6,9 +6,10 @@ type TransactionListProps = {
   filter: 'all' | 'income' | 'expense';
   setFilter: (filter: 'all' | 'income' | 'expense') => void;
   onDelete: (id: string) => void;
+  onEdit: (transaction: Transaction) => void;
 };
 
-export default function TransactionList({ transactions, filter, setFilter, onDelete }: TransactionListProps) {
+export default function TransactionList({ transactions, filter, setFilter, onDelete, onEdit }: TransactionListProps) {
   const filteredTransactions = transactions.filter(t => {
     if (filter === 'all') return true;
     return t.type === filter;
@@ -90,12 +91,19 @@ export default function TransactionList({ transactions, filter, setFilter, onDel
                   </div>
                 </div>
               </div>
-              <button 
-                onClick={() => handleDeleteConfirm(t.id)} 
-                className="text-sm text-gray-400 hover:text-red-500 px-3 py-1 bg-white border border-gray-200 rounded-lg hover:border-red-200 transition-colors"
-              >
-                Hapus
-              </button>
+              <div className="flex gap-2">
+                <button 
+                  onClick={() => onEdit(t)}
+                  className="text-sm text-blue-500 hover:text-red-500 px-3 py-1 bg-white border border-gray-200 rounded-lg hover:border-blue-200 transition-colors">
+                  Edit
+                </button>
+
+                <button 
+                  onClick={() => handleDeleteConfirm(t.id)} 
+                  className="text-sm text-gray-400 hover:text-red-500 px-3 py-1 bg-white border border-gray-200 rounded-lg hover:border-red-200 transition-colors">
+                  Hapus
+                </button>
+              </div>
             </li>
           ))}
         </ul>
