@@ -4,6 +4,7 @@ import TransactionList from './components/TransactionList'
 import TransactionForm from './components/TransactionForm'
 import SummaryCards from './components/SummaryCards'
 import EditModal from './components/EditModal'
+import ExpenseChart from './components/ExpenseChart'
 
 const EXPENSE_CATEGORIES = ['Makan & Minum', 'Transportasi', 'Tagihan', 'Hiburan', 'Lainnya'];
 const INCOME_CATEGORIES = ['Gaji', 'Bonus', 'Bisnis', 'Lainnya'];
@@ -92,6 +93,8 @@ function App() {
           expense={totalExpense} 
           balance={balance} 
         />
+
+        <ExpenseChart transactions={transactionsForSelectedMonth} />
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <TransactionForm type="expense" categories={EXPENSE_CATEGORIES} onSubmit={addTransaction} />
